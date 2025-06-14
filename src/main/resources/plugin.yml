@@ -1,0 +1,16 @@
+name: GemTracker
+main: com.gemtracker.GemTrackerPlugin
+version: 1.0
+api-version: 1.21
+commands:
+  gems:
+    description: Gem management
+    usage: /gems
+    permission: gemtracker.use
+permissions:
+  gemtracker.use:
+    description: Allows use of /gems
+    default: true
+  gemtracker.admin:
+    description: Admin commands for /gems
+    default: op

@@ -14,9 +14,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
 /**
- * Command executor for /gems.
+ * Handles the `/gems` command. Players can check their gem balance and
+ * administrators can adjust gem counts.
  */
 public class GemCommand implements CommandExecutor, TabCompleter {
+    /** Manager used for retrieving and modifying gem data. */
     private final GemManager gemManager;
 
     public GemCommand(GemManager gemManager) {
@@ -25,8 +27,10 @@ public class GemCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // If no arguments were supplied show the sender's own balance
         if (args.length == 0) {
             if (!(sender instanceof Player)) {
+                // Console must specify a player name
                 sender.sendMessage("Usage: /gems <player>");
                 return true;
             }
@@ -36,6 +40,7 @@ public class GemCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        // When one argument is given we treat it as a player lookup
         if (args.length == 1) {
             OfflinePlayer target = Bukkit.getOfflinePlayer(args[0]);
             int gems = gemManager.getGems(target.getUniqueId());
@@ -43,6 +48,7 @@ public class GemCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        // Three or more arguments means we're using an admin subcommand
         if (args.length >= 3) {
             if (!sender.hasPermission("gemtracker.admin")) {
                 sender.sendMessage("You do not have permission.");
@@ -58,6 +64,7 @@ public class GemCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage("Amount must be a number");
                 return true;
             }
+
             if (sub.equalsIgnoreCase("set")) {
                 gemManager.setGems(uuid, amount);
                 sender.sendMessage("Set " + target.getName() + "'s gems to " + amount);
@@ -70,12 +77,14 @@ public class GemCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        // Fallback usage message for anything that didn't match above
         sender.sendMessage("Usage: /gems [player] | set <player> <amount> | add <player> <amount>");
         return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        // Offer tab completion for the admin subcommands
         if (args.length == 1) {
             return StringUtil.copyPartialMatches(args[0], Arrays.asList("set", "add"), Arrays.asList());
         }
